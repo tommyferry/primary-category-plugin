@@ -5,32 +5,6 @@ const { withSelect, withDispatch } = wp.data;
 
 
 /**
- * Maps meta values into props passed to Primary Category dropdown component.
- *
- * @param {Object} select
- */
-const mapSelectToProps = ( select ) => {
-	const coreEditorMeta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
-	return { primaryCategory: coreEditorMeta[ 'pcp_primary_category_id' ] }; // eslint-disable-line camelcase
-};
-
-/**
- * Maps update functions into props passed to Primary Category dropdown component.
- *
- * @param {Object} dispatch
- */
-const mapDispatchToProps = ( dispatch ) => {
-	return {
-		setMetaFieldValue: ( value ) => {
-			dispatch( 'core/editor' ).editPost(
-				{ meta: { pcp_primary_category_id: parseInt( value ) } } // eslint-disable-line camelcase
-			);
-		}
-	};
-};
-
-
-/**
  * Creates a dropdown menu from a list of taxonomy term IDs.
  *
  * @param {Objects} props A props object.
@@ -57,10 +31,23 @@ const getPrimaryCategoryDropdown = ( props ) => {
 };
 
 // Defines Primary Category dropdown with metadata mapped in.
-const PrimaryCategoryDropdownWithData = withSelect( mapSelectToProps )( getPrimaryCategoryDropdown );
+const PrimaryCategoryDropdownWithData = withSelect( select => {
+	const coreEditorMeta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+	return {
+		primaryCategory: coreEditorMeta[ 'pcp_primary_category_id' ] // eslint-disable-line camelcase
+	};
+} )( getPrimaryCategoryDropdown );
 
 // Defines Primary Category dropdown with metadata & dispatch actions mapped in.
-const PrimaryCategoryDropdownWithDataAndActions = withDispatch( mapDispatchToProps )( PrimaryCategoryDropdownWithData );
+const PrimaryCategoryDropdownWithDataAndActions = withDispatch( dispatch => {
+	return {
+		setMetaFieldValue: ( value ) => {
+			dispatch( 'core/editor' ).editPost(
+				{ meta: { pcp_primary_category_id: parseInt( value ) } } // eslint-disable-line camelcase
+			);
+		}
+	};
+} )( PrimaryCategoryDropdownWithData );
 
 /**
  * Creates options array for a SelectControl. Includes an initial default object.
