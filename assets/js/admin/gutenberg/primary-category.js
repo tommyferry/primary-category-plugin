@@ -1,21 +1,39 @@
 const { __ } = wp.i18n;
 const { createElement: el, Fragment } = wp.element;
 const { SelectControl, PanelRow } = wp.components;
+const { withSelect } = wp.data;
+
+
+/**
+ * Maps meta values into props passed to Primary Category dropdown component.
+ *
+ * @param {Object} select
+ */
+const mapSelectToProps = ( select ) => {
+	const coreEditorMeta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+	return { primaryCategory: coreEditorMeta[ 'pcp_primary_category_id' ] };
+};
+
 
 /**
  * Creates a dropdown menu from a list of taxonomy term IDs.
  *
- * @param {number[]} terms An array of taxonomy term IDs.
+ * @param {Objects} props A props object.
  *
  * @return {Object} The dropdown menu element.
  */
-const getPrimaryCategoryDropdown = ( terms ) => {
+const getPrimaryCategoryDropdown = ( props ) => {
+	const {
+		terms,
+		primaryCategory
+	} = props;
+
 	return el(
 		SelectControl,
 		{
 			label: __( 'Primary Category' ),
 			options: getTermOptions( terms ),
-			// value: primaryTerm, // TODO: Handle value changes.
+			value: primaryCategory,
 			onChange: ( content ) => {
 				console.log( 'content changed to ', content );
 			}
@@ -23,6 +41,8 @@ const getPrimaryCategoryDropdown = ( terms ) => {
 	);
 };
 
+// Defines Primary Category dropdown with metadata mapped in.
+const PrimaryCategoryDropdownWithData = withSelect( mapSelectToProps )( getPrimaryCategoryDropdown );
 
 /**
  * Creates options array for a SelectControl. Includes an initial default object.
@@ -45,6 +65,7 @@ const getTermOptions = ( terms ) => {
 };
 
 
+
 /**
  * Adds a Primary Category dropdown selector to the default Gutenberg category UI.
  *
@@ -64,7 +85,14 @@ const addPrimaryCategoryDropdownUI = ( OriginalComponent ) => {
 			Fragment,
 			{},
 			el( OriginalComponent, props ),
-			el( PanelRow, {}, getPrimaryCategoryDropdown( props.terms ) )
+			el(
+				PanelRow,
+				{},
+				el(
+					PrimaryCategoryDropdownWithData,
+					props
+				)
+			)
 		);
 	};
 };

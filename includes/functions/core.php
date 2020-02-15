@@ -165,7 +165,7 @@ function admin_scripts() {
 	wp_enqueue_script(
 		'primary_category_plugin_admin',
 		script_url( 'admin', 'admin' ),
-		array( 'wp-element', 'wp-components', 'wp-i18n' ),
+		array( 'wp-element', 'wp-components', 'wp-i18n', 'wp-data' ),
 		PRIMARY_CATEGORY_PLUGIN_VERSION,
 		true
 	);
