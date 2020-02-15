@@ -13,20 +13,18 @@ const { compose } = wp.compose;
  * @return {Object} The dropdown menu element.
  */
 const getPrimaryCategoryDropdown = compose(
-	withDispatch( dispatch => {
+	withDispatch( ( dispatch, props ) => {
 		return {
 			setMetaFieldValue: ( value ) => {
 				dispatch( 'core/editor' ).editPost(
-					{ meta: { pcp_primary_category_id: parseInt( value ) } } // eslint-disable-line camelcase
+					{ meta: { [ props.fieldName ]: parseInt( value ) } }
 				);
 			}
 		};
 	} ),
-	withSelect( select => {
+	withSelect( ( select, props ) => {
 		const coreEditorMeta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
-		return {
-			primaryCategory: coreEditorMeta[ 'pcp_primary_category_id' ] // eslint-disable-line camelcase
-		};
+		return { primaryCategory: coreEditorMeta[ props.fieldName ] };
 	} )
 )( props => {
 	const {
@@ -92,7 +90,10 @@ const addPrimaryCategoryDropdownUI = ( OriginalComponent ) => {
 				{},
 				el(
 					getPrimaryCategoryDropdown,
-					props
+					{
+						fieldName: 'pcp_primary_category_id', // eslint-disable-line camelcase
+						...props
+					}
 				)
 			)
 		);
