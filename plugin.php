@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: PrimaryCategoryPlugin
- * Plugin URI:
- * Description:
+ * Plugin Name: Primary Category Plugin
+ * Plugin URI: https://example.com
+ * Description: Adds the ability to set a primary category for posts.
  * Version:     0.1.0
- * Author:      10up
- * Author URI:  https://10up.com
+ * Author:      Tommy Ferry
+ * Author URI:  https://example.com
  * Text Domain: primary-category-plugin
  * Domain Path: /languages
  *

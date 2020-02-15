@@ -1,15 +1,15 @@
 === Primary Category Plugin ===
-Contributors:      10up
-Tags: 
+Contributors:      Tommy Ferry
+Tags:
 Requires at least: 4.9
 Tested up to:      4.9
 Stable tag:        0.1.0
 
-A brief description of the plugin.
+Adds the ability to set a primary category for posts.
 
 == Description ==
 
-
+Adds the ability to set a primary category for posts.
 
 == Installation ==
 
