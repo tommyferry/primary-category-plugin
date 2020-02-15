@@ -1,7 +1,7 @@
 const { __ } = wp.i18n;
 const { createElement: el, Fragment } = wp.element;
 const { SelectControl, PanelRow } = wp.components;
-const { withSelect } = wp.data;
+const { withSelect, withDispatch } = wp.data;
 
 
 /**
@@ -11,7 +11,22 @@ const { withSelect } = wp.data;
  */
 const mapSelectToProps = ( select ) => {
 	const coreEditorMeta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
-	return { primaryCategory: coreEditorMeta[ 'pcp_primary_category_id' ] };
+	return { primaryCategory: coreEditorMeta[ 'pcp_primary_category_id' ] }; // eslint-disable-line camelcase
+};
+
+/**
+ * Maps update functions into props passed to Primary Category dropdown component.
+ *
+ * @param {Object} dispatch
+ */
+const mapDispatchToProps = ( dispatch ) => {
+	return {
+		setMetaFieldValue: ( value ) => {
+			dispatch( 'core/editor' ).editPost(
+				{ meta: { pcp_primary_category_id: parseInt( value ) } } // eslint-disable-line camelcase
+			);
+		}
+	};
 };
 
 
@@ -34,8 +49,8 @@ const getPrimaryCategoryDropdown = ( props ) => {
 			label: __( 'Primary Category' ),
 			options: getTermOptions( terms ),
 			value: primaryCategory,
-			onChange: ( content ) => {
-				console.log( 'content changed to ', content );
+			onChange: ( newValue ) => {
+				props.setMetaFieldValue( newValue );
 			}
 		}
 	);
@@ -43,6 +58,9 @@ const getPrimaryCategoryDropdown = ( props ) => {
 
 // Defines Primary Category dropdown with metadata mapped in.
 const PrimaryCategoryDropdownWithData = withSelect( mapSelectToProps )( getPrimaryCategoryDropdown );
+
+// Defines Primary Category dropdown with metadata & dispatch actions mapped in.
+const PrimaryCategoryDropdownWithDataAndActions = withDispatch( mapDispatchToProps )( PrimaryCategoryDropdownWithData );
 
 /**
  * Creates options array for a SelectControl. Includes an initial default object.
@@ -63,7 +81,6 @@ const getTermOptions = ( terms ) => {
 		...termObjects
 	];
 };
-
 
 
 /**
@@ -89,7 +106,7 @@ const addPrimaryCategoryDropdownUI = ( OriginalComponent ) => {
 				PanelRow,
 				{},
 				el(
-					PrimaryCategoryDropdownWithData,
+					PrimaryCategoryDropdownWithDataAndActions,
 					props
 				)
 			)
