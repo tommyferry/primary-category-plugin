@@ -68,7 +68,7 @@ const getTermOptions = ( categories ) => {
 	const termObjects = categories.map( category => ( { value: category.id, label: category.name } ) );
 
 	return [
-		{ value: null, label: __( 'Select a Primary Category' ), disabled: true },
+		{ value: null, label: __( 'Select a Primary Category' ) },
 		...termObjects
 	];
 };
