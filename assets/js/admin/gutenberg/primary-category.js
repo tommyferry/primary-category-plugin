@@ -6,7 +6,7 @@ const { compose } = wp.compose;
 
 
 /**
- * Creates a dropdown menu from a list of taxonomy term IDs.
+ * Creates a dropdown menu from provided props.
  *
  * @param {Objects} props A props object.
  *
