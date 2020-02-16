@@ -24,19 +24,29 @@ const getPrimaryCategoryDropdown = compose(
 	} ),
 	withSelect( ( select, props ) => {
 		const coreEditorMeta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
-		return { primaryCategory: coreEditorMeta[ props.fieldName ] };
+
+		// Creates an array of category entity objects (if they exist).
+		const categories = props.terms.reduce( ( termArr, termId ) => {
+			const term = select( 'core' ).getEntityRecord( 'taxonomy', 'category', termId );
+			if ( term ){
+				termArr.push( term );
+			}
+			return termArr;
+		}, [] );
+
+		return { primaryCategory: coreEditorMeta[ props.fieldName ], categories };
 	} )
 )( props => {
 	const {
-		terms,
-		primaryCategory
+		primaryCategory,
+		categories
 	} = props;
 
 	return el(
 		SelectControl,
 		{
 			label: __( 'Primary Category' ),
-			options: getTermOptions( terms ),
+			options: getTermOptions( categories ),
 			value: primaryCategory,
 			onChange: ( newValue ) => {
 				props.setMetaFieldValue( newValue );
@@ -54,13 +64,11 @@ const getPrimaryCategoryDropdown = compose(
  *
  * @return {Object[]} An array of option objects.
  */
-const getTermOptions = ( terms ) => {
-	const termObjects = terms.map( term => {
-		return { value: term, label: term };
-	} );
+const getTermOptions = ( categories ) => {
+	const termObjects = categories.map( category => ( { value: category.id, label: category.name } ) );
 
 	return [
-		{ value: null, label: __( 'Primary Category' ), disabled: true },
+		{ value: null, label: __( 'Select a Primary Category' ), disabled: true },
 		...termObjects
 	];
 };
