@@ -1,4 +1,4 @@
-const { __ } = wp.i18n;
+const { __, sprintf } = wp.i18n;
 const { createElement: el, Fragment } = wp.element;
 const { SelectControl, PanelRow } = wp.components;
 const { withSelect, withDispatch } = wp.data;
@@ -24,30 +24,50 @@ const getPrimaryTermDropdown = compose(
 	} ),
 	withSelect( ( select, props ) => {
 		const coreEditorMeta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+		const {
+			taxonomy: {
+				slug: taxonomyName,
+				labels: { singular_name } // eslint-disable-line camelcase
+			}
+		} = props;
 
 		// Creates an array of term entity objects (if they exist).
 		const terms = props.terms.reduce( ( termArr, termId ) => {
-			const term = select( 'core' ).getEntityRecord( 'taxonomy', 'category', termId );
+			const term = select( 'core' ).getEntityRecord( 'taxonomy', taxonomyName, termId );
 			if ( term ){
 				termArr.push( term );
 			}
 			return termArr;
 		}, [] );
 
-		return { primaryCategory: coreEditorMeta[ props.fieldName ], terms };
+		return { [`primary${singular_name}`]: coreEditorMeta[ props.fieldName ], terms }; // eslint-disable-line camelcase
 	} )
 )( props => {
 	const {
-		primaryCategory,
-		terms
+		terms,
+		taxonomy: {
+			labels: { singular_name } // eslint-disable-line camelcase
+		}
 	} = props;
 
 	return el(
 		SelectControl,
 		{
-			label: __( 'Primary Category' ),
-			options: getTermOptions( terms ),
-			value: primaryCategory,
+			label: sprintf(
+				__( 'Primary %s', 'primary-category-plugin' ),
+				singular_name // eslint-disable-line camelcase
+			),
+			options: [
+				{
+					value: null,
+					label: sprintf(
+						__( 'Select a Primary %s', 'primary-category-plugin' ),
+						singular_name // eslint-disable-line camelcase
+					)
+				},
+				...getTermOptions( terms )
+			],
+			value: props[`primary${singular_name}`], // eslint-disable-line camelcase
 			onChange: ( newValue ) => {
 				props.setMetaFieldValue( newValue );
 			}
@@ -56,7 +76,7 @@ const getPrimaryTermDropdown = compose(
 } );
 
 /**
- * Creates options array for a SelectControl. Includes an initial default object.
+ * Creates options array for a SelectControl.
  *
  * @link: https://developer.wordpress.org/block-editor/components/select-control/
  *
@@ -65,12 +85,7 @@ const getPrimaryTermDropdown = compose(
  * @return {Object[]} An array of option objects.
  */
 const getTermOptions = ( terms ) => {
-	const termObjects = terms.map( term => ( { value: term.id, label: term.name } ) );
-
-	return [
-		{ value: null, label: __( 'Select a Primary Category' ) },
-		...termObjects
-	];
+	return terms.map( term => ( { value: term.id, label: term.name } ) );
 };
 
 /**
@@ -79,13 +94,14 @@ const getTermOptions = ( terms ) => {
  * @param {Objects} props The props object.
  */
 const getPrimaryTermPanel = ( props ) => {
+	const { taxonomy: { slug: taxonomyName } } = props;
 	return el(
 		PanelRow,
 		{},
 		el(
 			getPrimaryTermDropdown,
 			{
-				fieldName: 'pcp_primary_category_id', // eslint-disable-line camelcase
+				fieldName: `pcp_primary_${taxonomyName}_id`, // eslint-disable-line camelcase
 				...props
 			}
 		)
@@ -99,11 +115,6 @@ const getPrimaryTermPanel = ( props ) => {
  */
 const addPrimaryTaxonomyTermDropdownUI = ( OriginalComponent ) => {
 	return ( props ) => {
-		// Focus on categories for now.
-		if ( 'category' !== props.slug ) {
-			return el( OriginalComponent, props );
-		}
-
 		const originalComponentUI  = el( OriginalComponent, props );
 		const primaryTermPanel = getPrimaryTermPanel( props );
 		return el( Fragment, {}, originalComponentUI, primaryTermPanel );
