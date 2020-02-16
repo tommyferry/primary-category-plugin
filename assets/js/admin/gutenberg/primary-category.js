@@ -60,7 +60,7 @@ const getPrimaryCategoryDropdown = compose(
  *
  * @link: https://developer.wordpress.org/block-editor/components/select-control/
  *
- * @param {number[]} terms An array of taxonomy term IDs.
+ * @param {Object[]} categories An array of taxonomy objects.
  *
  * @return {Object[]} An array of option objects.
  */
