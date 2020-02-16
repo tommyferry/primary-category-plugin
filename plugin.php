@@ -20,6 +20,7 @@ define( 'PRIMARY_CATEGORY_PLUGIN_INC', PRIMARY_CATEGORY_PLUGIN_PATH . 'includes/
 
 // Include files.
 require_once PRIMARY_CATEGORY_PLUGIN_INC . 'functions/core.php';
+require_once PRIMARY_CATEGORY_PLUGIN_INC . 'functions/filters.php';
 
 // Activation/Deactivation.
 register_activation_hook( __FILE__, '\PrimaryCategoryPlugin\Core\activate' );
@@ -27,6 +28,7 @@ register_deactivation_hook( __FILE__, '\PrimaryCategoryPlugin\Core\deactivate' )
 
 // Bootstrap.
 PrimaryCategoryPlugin\Core\setup();
+PrimaryCategoryPlugin\Filters\add_filters();
 
 // Require Composer autoloader if it exists.
 if ( file_exists( PRIMARY_CATEGORY_PLUGIN_PATH . '/vendor/autoload.php' ) ) {
