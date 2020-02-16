@@ -12,7 +12,7 @@ const { compose } = wp.compose;
  *
  * @return {Object} The dropdown menu element.
  */
-const getPrimaryCategoryDropdown = compose(
+const getPrimaryTermDropdown = compose(
 	withDispatch( ( dispatch, props ) => {
 		return {
 			setMetaFieldValue: ( value ) => {
@@ -25,8 +25,8 @@ const getPrimaryCategoryDropdown = compose(
 	withSelect( ( select, props ) => {
 		const coreEditorMeta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
 
-		// Creates an array of category entity objects (if they exist).
-		const categories = props.terms.reduce( ( termArr, termId ) => {
+		// Creates an array of term entity objects (if they exist).
+		const terms = props.terms.reduce( ( termArr, termId ) => {
 			const term = select( 'core' ).getEntityRecord( 'taxonomy', 'category', termId );
 			if ( term ){
 				termArr.push( term );
@@ -34,19 +34,19 @@ const getPrimaryCategoryDropdown = compose(
 			return termArr;
 		}, [] );
 
-		return { primaryCategory: coreEditorMeta[ props.fieldName ], categories };
+		return { primaryCategory: coreEditorMeta[ props.fieldName ], terms };
 	} )
 )( props => {
 	const {
 		primaryCategory,
-		categories
+		terms
 	} = props;
 
 	return el(
 		SelectControl,
 		{
 			label: __( 'Primary Category' ),
-			options: getTermOptions( categories ),
+			options: getTermOptions( terms ),
 			value: primaryCategory,
 			onChange: ( newValue ) => {
 				props.setMetaFieldValue( newValue );
@@ -60,12 +60,12 @@ const getPrimaryCategoryDropdown = compose(
  *
  * @link: https://developer.wordpress.org/block-editor/components/select-control/
  *
- * @param {Object[]} categories An array of taxonomy objects.
+ * @param {Object[]} terms An array of taxonomy objects.
  *
  * @return {Object[]} An array of option objects.
  */
-const getTermOptions = ( categories ) => {
-	const termObjects = categories.map( category => ( { value: category.id, label: category.name } ) );
+const getTermOptions = ( terms ) => {
+	const termObjects = terms.map( term => ( { value: term.id, label: term.name } ) );
 
 	return [
 		{ value: null, label: __( 'Select a Primary Category' ) },
@@ -74,16 +74,16 @@ const getTermOptions = ( categories ) => {
 };
 
 /**
- * Creates the Primary Category setting panel element.
+ * Creates the Primary Term setting panel element.
  *
  * @param {Objects} props The props object.
  */
-const getPrimaryCategoryPanel = ( props ) => {
+const getPrimaryTermPanel = ( props ) => {
 	return el(
 		PanelRow,
 		{},
 		el(
-			getPrimaryCategoryDropdown,
+			getPrimaryTermDropdown,
 			{
 				fieldName: 'pcp_primary_category_id', // eslint-disable-line camelcase
 				...props
@@ -93,11 +93,11 @@ const getPrimaryCategoryPanel = ( props ) => {
 };
 
 /**
- * Adds a Primary Category dropdown selector to the default Gutenberg category UI.
+ * Adds a Primary Taxonomy Term dropdown selector to the Gutenberg UI.
  *
  * @param {Object} OriginalComponent The original Gutenberg category UI component.
  */
-const addPrimaryCategoryDropdownUI = ( OriginalComponent ) => {
+const addPrimaryTaxonomyTermDropdownUI = ( OriginalComponent ) => {
 	return ( props ) => {
 		// Focus on categories for now.
 		if ( 'category' !== props.slug ) {
@@ -105,14 +105,13 @@ const addPrimaryCategoryDropdownUI = ( OriginalComponent ) => {
 		}
 
 		const originalComponentUI  = el( OriginalComponent, props );
-		const primaryCategoryPanel = getPrimaryCategoryPanel( props );
-
-		return el( Fragment, {}, originalComponentUI, primaryCategoryPanel );
+		const primaryTermPanel = getPrimaryTermPanel( props );
+		return el( Fragment, {}, originalComponentUI, primaryTermPanel );
 	};
 };
 
 wp.hooks.addFilter(
 	'editor.PostTaxonomyType',
 	'primary-category-plugin',
-	addPrimaryCategoryDropdownUI
+	addPrimaryTaxonomyTermDropdownUI
 );
