@@ -65,6 +65,24 @@ const getTermOptions = ( terms ) => {
 	];
 };
 
+/**
+ * Creates the Primary Category setting panel element.
+ *
+ * @param {Objects} props The props object.
+ */
+const getPrimaryCategoryPanel = ( props ) => {
+	return el(
+		PanelRow,
+		{},
+		el(
+			getPrimaryCategoryDropdown,
+			{
+				fieldName: 'pcp_primary_category_id', // eslint-disable-line camelcase
+				...props
+			}
+		)
+	);
+};
 
 /**
  * Adds a Primary Category dropdown selector to the default Gutenberg category UI.
@@ -75,28 +93,13 @@ const addPrimaryCategoryDropdownUI = ( OriginalComponent ) => {
 	return ( props ) => {
 		// Focus on categories for now.
 		if ( 'category' !== props.slug ) {
-			return el(
-				OriginalComponent,
-				props
-			);
+			return el( OriginalComponent, props );
 		}
 
-		return el(
-			Fragment,
-			{},
-			el( OriginalComponent, props ),
-			el(
-				PanelRow,
-				{},
-				el(
-					getPrimaryCategoryDropdown,
-					{
-						fieldName: 'pcp_primary_category_id', // eslint-disable-line camelcase
-						...props
-					}
-				)
-			)
-		);
+		const originalComponentUI  = el( OriginalComponent, props );
+		const primaryCategoryPanel = getPrimaryCategoryPanel( props );
+
+		return el( Fragment, {}, originalComponentUI, primaryCategoryPanel );
 	};
 };
 
