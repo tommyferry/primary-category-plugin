@@ -17,7 +17,18 @@ function get_primary_term_taxonomies() {
 		'public' => true,
 	);
 
-	$taxonomies = get_taxonomies( $args );
+	/**
+	 * Filter the arguments used to get taxonomies that can have a primary term.
+	 *
+	 * See {@link: https://developer.wordpress.org/reference/functions/get_taxonomies/}
+	 *
+	 * @hook pcp_primary_term_taxonomy_args
+	 *
+	 * @param {array} An array of arguments (as used by get_taxonomies).
+	 *
+	 * @return {array} The filtered arguments array.
+	 */
+	$taxonomies = get_taxonomies( apply_filters( 'pcp_primary_term_taxonomy_args', $args ) );
 
 	/**
 	 * Filter the list of taxonomies
