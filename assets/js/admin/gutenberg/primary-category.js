@@ -115,7 +115,19 @@ const getPrimaryTermPanel = ( props ) => {
  */
 const addPrimaryTaxonomyTermDropdownUI = ( OriginalComponent ) => {
 	return ( props ) => {
+		const { taxonomy: { slug: taxonomyName } } = props;
 		const originalComponentUI  = el( OriginalComponent, props );
+
+		// Bail early - script not localized (somehow).
+		if ( ! pcp_js_data ) { // eslint-disable-line no-undef, camelcase
+			return originalComponentUI;
+		}
+
+		// Bail early - current taxonomy not allowed a primary term.
+		if ( ! ( taxonomyName in pcp_js_data.taxonomies ) ) { // eslint-disable-line no-undef, camelcase
+			return originalComponentUI;
+		}
+
 		const primaryTermPanel = getPrimaryTermPanel( props );
 		return el( Fragment, {}, originalComponentUI, primaryTermPanel );
 	};
