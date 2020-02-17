@@ -18,7 +18,7 @@ function add_filters() {
 	};
 
 	// Register primary category meta key.
-	add_action( 'init', $n( 'register_primary_term_meta' ), 10, 0 );
+	add_action( 'init', $n( 'register_all_primary_term_post_meta' ), 10, 0 );
 }
 
 
@@ -39,4 +39,28 @@ function register_primary_term_meta( string $post_type = 'post', string $taxonom
 			'type'         => 'integer',
 		)
 	);
+}
+
+
+/**
+ * Register primary category meta keys for all valid taxonomies.
+ *
+ * @return void
+ */
+function register_all_primary_term_post_meta() {
+	$taxonomies = get_taxonomies(
+		array(
+			'public' => true,
+		)
+	);
+
+	// Bail early - no (public) taxonomies found.
+	if ( ! is_array( $taxonomies ) || empty( $taxonomies ) ) {
+		return;
+	}
+
+	// Register each taxonomy term meta (for posts only).
+	foreach ( $taxonomies as $taxonomy ) {
+		register_primary_term_meta( 'post', $taxonomy );
+	}
 }
