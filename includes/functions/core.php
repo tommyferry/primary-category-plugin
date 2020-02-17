@@ -8,6 +8,7 @@
 namespace PrimaryCategoryPlugin\Core;
 
 use \WP_Error as WP_Error;
+use function PrimaryCategoryPlugin\Utils\get_primary_term_taxonomies;
 
 /**
  * Default setup routine
@@ -162,7 +163,7 @@ function admin_scripts() {
 		true
 	);
 
-	wp_enqueue_script(
+	wp_register_script(
 		'primary_category_plugin_admin',
 		script_url( 'admin', 'admin' ),
 		array( 'wp-element', 'wp-components', 'wp-i18n', 'wp-data', 'wp-compose' ),
@@ -170,6 +171,13 @@ function admin_scripts() {
 		true
 	);
 
+	$pcp_admin_js_data = array(
+		'taxonomies' => get_primary_term_taxonomies(),
+	);
+
+	wp_localize_script( 'primary_category_plugin_admin', 'pcp_js_data', $pcp_admin_js_data );
+
+	wp_enqueue_script( 'primary_category_plugin_admin' );
 }
 
 /**
