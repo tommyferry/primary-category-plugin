@@ -1,4 +1,4 @@
-const { __ } = wp.i18n;
+const { __, sprintf } = wp.i18n;
 const { createElement: el, Fragment } = wp.element;
 const { SelectControl, PanelRow } = wp.components;
 const { withSelect, withDispatch } = wp.data;
@@ -12,7 +12,7 @@ const { compose } = wp.compose;
  *
  * @return {Object} The dropdown menu element.
  */
-const getPrimaryCategoryDropdown = compose(
+const getPrimaryTermDropdown = compose(
 	withDispatch( ( dispatch, props ) => {
 		return {
 			setMetaFieldValue: ( value ) => {
@@ -24,30 +24,50 @@ const getPrimaryCategoryDropdown = compose(
 	} ),
 	withSelect( ( select, props ) => {
 		const coreEditorMeta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+		const {
+			taxonomy: {
+				slug: taxonomyName,
+				labels: { singular_name } // eslint-disable-line camelcase
+			}
+		} = props;
 
-		// Creates an array of category entity objects (if they exist).
-		const categories = props.terms.reduce( ( termArr, termId ) => {
-			const term = select( 'core' ).getEntityRecord( 'taxonomy', 'category', termId );
+		// Creates an array of term entity objects (if they exist).
+		const terms = props.terms.reduce( ( termArr, termId ) => {
+			const term = select( 'core' ).getEntityRecord( 'taxonomy', taxonomyName, termId );
 			if ( term ){
 				termArr.push( term );
 			}
 			return termArr;
 		}, [] );
 
-		return { primaryCategory: coreEditorMeta[ props.fieldName ], categories };
+		return { [`primary${singular_name}`]: coreEditorMeta[ props.fieldName ], terms }; // eslint-disable-line camelcase
 	} )
 )( props => {
 	const {
-		primaryCategory,
-		categories
+		terms,
+		taxonomy: {
+			labels: { singular_name } // eslint-disable-line camelcase
+		}
 	} = props;
 
 	return el(
 		SelectControl,
 		{
-			label: __( 'Primary Category' ),
-			options: getTermOptions( categories ),
-			value: primaryCategory,
+			label: sprintf(
+				__( 'Primary %s', 'primary-category-plugin' ),
+				singular_name // eslint-disable-line camelcase
+			),
+			options: [
+				{
+					value: null,
+					label: sprintf(
+						__( 'Select a Primary %s', 'primary-category-plugin' ),
+						singular_name // eslint-disable-line camelcase
+					)
+				},
+				...getTermOptions( terms )
+			],
+			value: props[`primary${singular_name}`], // eslint-disable-line camelcase
 			onChange: ( newValue ) => {
 				props.setMetaFieldValue( newValue );
 			}
@@ -56,36 +76,32 @@ const getPrimaryCategoryDropdown = compose(
 } );
 
 /**
- * Creates options array for a SelectControl. Includes an initial default object.
+ * Creates options array for a SelectControl.
  *
  * @link: https://developer.wordpress.org/block-editor/components/select-control/
  *
- * @param {Object[]} categories An array of taxonomy objects.
+ * @param {Object[]} terms An array of taxonomy objects.
  *
  * @return {Object[]} An array of option objects.
  */
-const getTermOptions = ( categories ) => {
-	const termObjects = categories.map( category => ( { value: category.id, label: category.name } ) );
-
-	return [
-		{ value: null, label: __( 'Select a Primary Category' ) },
-		...termObjects
-	];
+const getTermOptions = ( terms ) => {
+	return terms.map( term => ( { value: term.id, label: term.name } ) );
 };
 
 /**
- * Creates the Primary Category setting panel element.
+ * Creates the Primary Term setting panel element.
  *
  * @param {Objects} props The props object.
  */
-const getPrimaryCategoryPanel = ( props ) => {
+const getPrimaryTermPanel = ( props ) => {
+	const { taxonomy: { slug: taxonomyName } } = props;
 	return el(
 		PanelRow,
 		{},
 		el(
-			getPrimaryCategoryDropdown,
+			getPrimaryTermDropdown,
 			{
-				fieldName: 'pcp_primary_category_id', // eslint-disable-line camelcase
+				fieldName: `pcp_primary_${taxonomyName}_id`,
 				...props
 			}
 		)
@@ -93,26 +109,32 @@ const getPrimaryCategoryPanel = ( props ) => {
 };
 
 /**
- * Adds a Primary Category dropdown selector to the default Gutenberg category UI.
+ * Adds a Primary Taxonomy Term dropdown selector to the Gutenberg UI.
  *
  * @param {Object} OriginalComponent The original Gutenberg category UI component.
  */
-const addPrimaryCategoryDropdownUI = ( OriginalComponent ) => {
+const addPrimaryTaxonomyTermDropdownUI = ( OriginalComponent ) => {
 	return ( props ) => {
-		// Focus on categories for now.
-		if ( 'category' !== props.slug ) {
-			return el( OriginalComponent, props );
+		const { taxonomy: { slug: taxonomyName } } = props;
+		const originalComponentUI  = el( OriginalComponent, props );
+
+		// Bail early - script not localized (somehow).
+		if ( ! pcp_js_data ) { // eslint-disable-line no-undef, camelcase
+			return originalComponentUI;
 		}
 
-		const originalComponentUI  = el( OriginalComponent, props );
-		const primaryCategoryPanel = getPrimaryCategoryPanel( props );
+		// Bail early - current taxonomy not allowed a primary term.
+		if ( ! ( taxonomyName in pcp_js_data.taxonomies ) ) { // eslint-disable-line no-undef, camelcase
+			return originalComponentUI;
+		}
 
-		return el( Fragment, {}, originalComponentUI, primaryCategoryPanel );
+		const primaryTermPanel = getPrimaryTermPanel( props );
+		return el( Fragment, {}, originalComponentUI, primaryTermPanel );
 	};
 };
 
 wp.hooks.addFilter(
 	'editor.PostTaxonomyType',
 	'primary-category-plugin',
-	addPrimaryCategoryDropdownUI
+	addPrimaryTaxonomyTermDropdownUI
 );
