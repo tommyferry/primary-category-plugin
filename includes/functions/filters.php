@@ -18,7 +18,7 @@ function add_filters() {
 	};
 
 	// Register primary category meta key.
-	add_action( 'init', $n( 'register_primary_term_meta' ) );
+	add_action( 'init', $n( 'register_primary_term_meta' ), 10, 0 );
 }
 
 
