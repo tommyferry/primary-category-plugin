@@ -20,6 +20,7 @@ define( 'PRIMARY_CATEGORY_PLUGIN_INC', PRIMARY_CATEGORY_PLUGIN_PATH . 'includes/
 
 // Include files.
 require_once PRIMARY_CATEGORY_PLUGIN_INC . 'functions/core.php';
+require_once PRIMARY_CATEGORY_PLUGIN_INC . 'functions/utils.php';
 require_once PRIMARY_CATEGORY_PLUGIN_INC . 'functions/filters.php';
 
 // Activation/Deactivation.
