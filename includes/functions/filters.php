@@ -21,6 +21,9 @@ function add_filters() {
 
 	// Register primary category meta key.
 	add_action( 'init', $n( 'register_all_primary_term_post_meta' ), 10, 0 );
+
+	// Filter the taxonomies that can have a primary term set.
+	add_filter( 'pcp_primary_term_taxonomies', $n( 'filter_primary_term_taxonomies' ) );
 }
 
 
@@ -61,4 +64,19 @@ function register_all_primary_term_post_meta() {
 	foreach ( $taxonomies as $taxonomy ) {
 		register_primary_term_meta( 'post', $taxonomy );
 	}
+}
+
+
+/**
+ * Filters the taxonomies that can have a primary term set.
+ *
+ * @param array $taxonomies An array of taxonomies that can have a primary term set.
+ * @return array The filtered array of taxonomies.
+ */
+function filter_primary_term_taxonomies( array $taxonomies ) : array {
+	// Remove tags and post formats (can be overriden).
+	unset( $taxonomies['post_tag'] );
+	unset( $taxonomies['post_format'] );
+
+	return $taxonomies;
 }
