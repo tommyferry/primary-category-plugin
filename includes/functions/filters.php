@@ -7,6 +7,8 @@
 
 namespace PrimaryCategoryPlugin\Filters;
 
+use function PrimaryCategoryPlugin\Utils\get_primary_term_taxonomies;
+
 /**
  * Adds all registered filters.
  *
@@ -48,11 +50,7 @@ function register_primary_term_meta( string $post_type = 'post', string $taxonom
  * @return void
  */
 function register_all_primary_term_post_meta() {
-	$taxonomies = get_taxonomies(
-		array(
-			'public' => true,
-		)
-	);
+	$taxonomies = get_primary_term_taxonomies();
 
 	// Bail early - no (public) taxonomies found.
 	if ( ! is_array( $taxonomies ) || empty( $taxonomies ) ) {
