@@ -14,7 +14,8 @@ namespace PrimaryCategoryPlugin\Utils;
  */
 function get_primary_term_taxonomies() {
 	$args = array(
-		'public' => true,
+		'public'   => true,
+		'_builtin' => true,
 	);
 
 	/**
