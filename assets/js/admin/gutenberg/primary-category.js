@@ -101,7 +101,7 @@ const getPrimaryTermPanel = ( props ) => {
 		el(
 			getPrimaryTermDropdown,
 			{
-				fieldName: `pcp_primary_${taxonomyName}_id`, // eslint-disable-line camelcase
+				fieldName: `pcp_primary_${taxonomyName}_id`,
 				...props
 			}
 		)
