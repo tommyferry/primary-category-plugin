@@ -29,7 +29,7 @@ function get_primary_term_taxonomies() {
 	 *
 	 * @return {array} The filtered arguments array.
 	 */
-	$taxonomies = get_taxonomies( apply_filters( 'pcp_primary_term_taxonomy_args', $args ) );
+	$taxonomies = get_taxonomies( apply_filters( 'pcp_primary_term_taxonomies_args', $args ) );
 
 	/**
 	 * Filter the list of taxonomies
